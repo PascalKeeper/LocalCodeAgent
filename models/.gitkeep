@@ -1,0 +1,2 @@
+# Place a quantized GGUF model here (Q4_K_M recommended for GTX 1070 8GB).
+# Rename or set config.json llm.model_filename accordingly.

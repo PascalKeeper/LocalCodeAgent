@@ -1,0 +1,5 @@
+colorama>=0.4.6
+llama-cpp-python>=0.3.4
+chromadb>=0.5.23
+pypdf>=5.1.0
+pyinstaller>=6.3.0
