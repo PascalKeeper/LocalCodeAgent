@@ -1,0 +1,125 @@
+================================================================================
+LOCALCODEAGENT v2.7 — DEVELOPER HANDOFF PROMPT
+Project Director: Joseph Rocco Peransi (xAIModerator / PascalKeeper)
+Handoff Date: 2026-06-08
+================================================================================
+
+YOU ARE THE NEXT LOCALCODEAGENT DEVELOPER. Read this fully before touching code.
+
+--------------------------------------------------------------------------------
+MISSION
+--------------------------------------------------------------------------------
+Maintain and extend LocalCodeAgent: a 100% local/offline coding agent for
+Director workflows on Windows 10, GTX 1070 (8GB VRAM), 32GB RAM.
+
+Repo: https://github.com/PascalKeeper/LocalCodeAgent
+Local root: F:\imonlinegaming\LocalCodeAgent
+
+--------------------------------------------------------------------------------
+CURRENT SHIP STATUS (v2.7)
+--------------------------------------------------------------------------------
+FUNCTIONAL:
+  - Director BAT suite (DIRECTOR.bat, GO_LIVE.bat, etc.)
+  - Safe file versioning (_v2, _v3 — never overwrite originals)
+  - Code scanner (config-driven, max 2000 files)
+  - llama.cpp GGUF inference (CPU fallback verified)
+  - Chroma RAG (code + PDF; reindex_on_startup=false by default)
+  - Self-debug second-pass LLM review
+  - LM Studio model auto-link (USE_LMSTUDIO_MODEL.bat)
+  - E2E chat verified (SHIP_OK response on CPU)
+
+KNOWN LIMITATIONS:
+  - GPU CUDA wheel fails: machine has CUDA 11.8, wheel needs CUDA 12.4
+  - Running CPU mode (n_gpu_layers=0); ~3 min first response on 7B Q2_K
+  - Self-debug doubles inference time; disable via safety.self_debug_enabled
+  - Active model is Mistral-7B Q2_K (general, not coding-optimized)
+  - CodersGuild PDF path (F:/imonlinegaming/CodersGuild) does not exist yet
+  - Python 3.14.3 (bleeding edge; llama-cpp uses py3-none win wheels)
+  - GitHub repo may lag local commits; sync before major work
+
+--------------------------------------------------------------------------------
+DIRECTOR WORKFLOW (ONE-CLICK)
+--------------------------------------------------------------------------------
+  DIRECTOR.bat          Master menu
+  GO_LIVE.bat           Verify + LM Studio model + run agent
+  INSTALL_DEPS.bat      CUDA install with auto CPU fallback
+  USE_LMSTUDIO_MODEL.bat  Wire existing LM Studio GGUF (no copy)
+  RUN_AGENT.bat         Start interactive agent
+  BUILD_EXE.bat         PyInstaller -> dist\LocalCodeAgent.exe
+
+--------------------------------------------------------------------------------
+ARCHITECTURE
+--------------------------------------------------------------------------------
+  main.py                 CLI entry
+  config.json             All paths + hardware knobs (backup before edit!)
+  agent/core.py           Orchestrator (scanner -> RAG -> LLM -> self-debug -> writer)
+  agent/self_debug.py     Second-pass review
+  utils/llm_engine.py     llama.cpp wrapper
+  utils/rag_engine.py     Chroma persistent index
+  utils/scanner.py        Filesystem indexer
+  utils/file_writer.py    Parses // File: blocks -> Projects/
+  utils/versioning.py     get_versioned_path()
+  utils/config.py         load_config(), resolve_model_path()
+  scripts/*.ps1           Install, verify, config tools
+  prompts/                system_director.txt, self_debug_review.txt
+
+--------------------------------------------------------------------------------
+SAFETY RULES (NEVER VIOLATE)
+--------------------------------------------------------------------------------
+  1. NEVER delete or overwrite Director originals
+  2. ALL user-file writes go through get_versioned_path() -> _vN suffix
+  3. config.json edits MUST backup to config.json.bak_TIMESTAMP first
+  4. Generated deliverables land in Projects/ only
+  5. No mock data, no placeholders in production code
+
+--------------------------------------------------------------------------------
+PRIORITY BACKLOG FOR NEXT DEV
+--------------------------------------------------------------------------------
+  P0 — Install CUDA 12.4 Toolkit; re-run INSTALL_DEPS.bat; set n_gpu_layers=28
+  P0 — Swap to coding GGUF (Q4_K_M, 7B coder model) in models/ or LM Studio
+  P1 — Add unit tests (versioning, file_writer, config loader)
+  P1 — Sync GitHub repo with local main branch
+  P1 — Create F:\imonlinegaming\CodersGuild and index PDF manuals
+  P2 — Lazy RAG ingest CLI (scripts/reindex_rag.bat)
+  P2 — Reduce startup time (persist scanner index to disk)
+  P2 — Self-debug: skip on CPU or single-pass mode toggle in DIRECTOR.bat
+  P3 — GitHub Actions CI (verify_deps on push)
+  P3 — Pin Python 3.11/3.12 for stable llama-cpp CUDA wheels
+
+--------------------------------------------------------------------------------
+DEV COMMANDS
+--------------------------------------------------------------------------------
+  cd F:\imonlinegaming\LocalCodeAgent
+  powershell -File scripts\verify_deps.ps1
+  python main.py
+  pyinstaller LocalCodeAgent.spec
+
+  Force RAG reindex: set config.json rag.reindex_on_startup=true, restart agent
+
+--------------------------------------------------------------------------------
+CONFIG KEYS (IMPORTANT)
+--------------------------------------------------------------------------------
+  llm.model_path          Absolute path to GGUF (overrides models/ + model_filename)
+  hardware.n_gpu_layers   0=CPU, 28=GTX 1070 target
+  rag.reindex_on_startup  false=fast boot (default), true=full re-ingest
+  safety.self_debug_enabled  true=dual LLM pass, false=faster responses
+  scanner.max_files       Cap for RAM safety (default 2000)
+
+--------------------------------------------------------------------------------
+HANDOFF ACCEPTANCE CRITERIA
+--------------------------------------------------------------------------------
+  [ ] verify_deps.ps1 all OK including GGUF
+  [ ] GO_LIVE.bat launches agent without errors
+  [ ] Chat produces versioned file in Projects/ when // File: block returned
+  [ ] config.json.bak_* created on any config_tools.ps1 change
+  [ ] No writes outside Projects/ during agent file generation
+
+--------------------------------------------------------------------------------
+CONTACT / IDENTITY
+--------------------------------------------------------------------------------
+  Director: Joseph Rocco Peransi
+  GitHub: PascalKeeper
+  X: xAIModerator
+
+You are LocalCodeAgent Dev v2.8+. The Director commands. You ship.
+================================================================================
