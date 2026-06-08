@@ -15,9 +15,17 @@ Offline, hardware-aware local coding agent for Project Director workflows. Runs 
 
 ## Quick Start
 
+**Double-click (recommended):**
+- `CONTINUE_SHIP.bat` — menu: CUDA install, CPU install, base deps, verify
+- `INSTALL_DEPS.bat` — one-click CUDA install for GTX 1070
+
+**PowerShell:**
 ```powershell
 cd F:\imonlinegaming\LocalCodeAgent
-.\scripts\install_deps.ps1
+.\scripts\install_deps.ps1 -Cuda      # GPU (recommended)
+.\scripts\install_deps.ps1 -CpuOnly   # CPU llama-cpp
+.\scripts\install_deps.ps1 -SkipLlm   # RAG/scanner deps only
+.\scripts\verify_deps.ps1             # verify only
 ```
 
 1. Place a quantized GGUF model in `models/` (Q4_K_M recommended).
