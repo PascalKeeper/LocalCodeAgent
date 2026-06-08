@@ -22,17 +22,7 @@ def main() -> int:
     version = config.get("version", "2.7.0")
     print(f"{Fore.CYAN}=== LocalCodeAgent v{version} — Director Mode ==={Style.RESET_ALL}")
 
-    try:
-        agent = LocalCodeAgent()
-    except (RuntimeError, FileNotFoundError) as exc:
-        print(f"{Fore.RED}[STARTUP ERROR] {exc}{Style.RESET_ALL}")
-        print(
-            f"{Fore.YELLOW}Install dependencies: pip install -r requirements.txt{Style.RESET_ALL}"
-        )
-        print(
-            f"{Fore.YELLOW}Place a GGUF model in: {config['paths']['models']}{Style.RESET_ALL}"
-        )
-        return 1
+    agent = LocalCodeAgent()
 
     while True:
         try:
@@ -46,7 +36,17 @@ def main() -> int:
             return 0
 
         if cmd:
-            response = agent.chat(cmd)
+            try:
+                response = agent.chat(cmd)
+            except (RuntimeError, FileNotFoundError) as exc:
+                print(f"{Fore.RED}[LLM ERROR] {exc}{Style.RESET_ALL}")
+                print(
+                    f"{Fore.YELLOW}Install deps: pip install -r requirements.txt{Style.RESET_ALL}"
+                )
+                print(
+                    f"{Fore.YELLOW}Place GGUF model in: {config['paths']['models']}{Style.RESET_ALL}"
+                )
+                continue
             print(f"{Fore.CYAN}Agent > {Style.RESET_ALL}{response}\n")
 
 
