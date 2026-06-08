@@ -40,9 +40,9 @@ class LocalCodeAgent:
         self._rag.ingest_code_index(self._code_index)
         self._rag.ingest_pdfs()
 
-        self._llm = LLMEngine(self._config, self._log_dir)
+        self._llm: LLMEngine | None = None
+        self._debugger: SelfDebugger | None = None
         self._writer = FileWriter(self._config, self._log_dir)
-        self._debugger = SelfDebugger(self._config, self._llm, self._log_dir)
 
         print(
             f"{Fore.GREEN}LocalCodeAgent v{self._config['version']} ready "
@@ -52,6 +52,12 @@ class LocalCodeAgent:
     @property
     def config(self) -> dict[str, Any]:
         return self._config
+
+    def _ensure_llm(self) -> tuple[LLMEngine, SelfDebugger]:
+        if self._llm is None:
+            self._llm = LLMEngine(self._config, self._log_dir)
+            self._debugger = SelfDebugger(self._config, self._llm, self._log_dir)
+        return self._llm, self._debugger  # type: ignore[return-value]
 
     def chat(self, prompt: str) -> str:
         print(f"{Fore.CYAN}Processing with safe versioning...{Style.RESET_ALL}")
@@ -78,8 +84,9 @@ class LocalCodeAgent:
             + "```python\n# code\n```"
         )
 
-        response = self._llm.generate(self._system_prompt, user_prompt)
-        reviewed, status = self._debugger.review(prompt, response)
+        llm, debugger = self._ensure_llm()
+        response = llm.generate(self._system_prompt, user_prompt)
+        reviewed, status = debugger.review(prompt, response)
         final_response = reviewed if status == "REVISED" else response
 
         saved = self._writer.save_from_response(final_response)
